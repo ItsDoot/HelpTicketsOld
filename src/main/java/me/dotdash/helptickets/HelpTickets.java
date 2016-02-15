@@ -12,19 +12,22 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.game.state.GameInitializationEvent;
 import org.spongepowered.api.event.game.state.GameStoppingServerEvent;
 import org.spongepowered.api.plugin.Plugin;
+import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.service.user.UserStorageService;
 import org.spongepowered.api.text.Text;
 
 import me.dotdash.helptickets.command.CommandTicket;
 import me.dotdash.helptickets.command.CommandTicketComplete;
 import me.dotdash.helptickets.command.CommandTicketCreate;
+import me.dotdash.helptickets.command.CommandTicketDelete;
+import me.dotdash.helptickets.command.CommandTicketInfo;
 import me.dotdash.helptickets.command.CommandTicketList;
 import me.dotdash.helptickets.command.CommandTicketTeleport;
 import me.dotdash.helptickets.configuration.HoconConfig;
 
 import java.io.File;
 
-@Plugin(id = "HelpTickets", name = "HelpTickets", version = "1.1.1")
+@Plugin(id = "HelpTickets", name = "HelpTickets", version = "2.0.0")
 public class HelpTickets {
 
     @Inject private Game game;
@@ -34,6 +37,7 @@ public class HelpTickets {
 
     private HoconConfig config, tickets;
     private UserStorageService userStorage;
+    private PaginationService pagination;
 
     public HoconConfig getConfig() {
         return config;
@@ -47,15 +51,19 @@ public class HelpTickets {
         return userStorage;
     }
 
+    public PaginationService getPagination() {
+        return pagination;
+    }
+
     @Listener
     public void onInit(GameInitializationEvent event) {
         config = new HoconConfig(logger, new File(configDir, "config.conf"));
         tickets = new HoconConfig(logger, new File(configDir, "tickets.conf"));
         userStorage = game.getServiceManager().provideUnchecked(UserStorageService.class);
+        pagination = game.getServiceManager().provideUnchecked(PaginationService.class);
 
         game.getCommandManager().register(this, CommandSpec.builder()
-                .permission("helptickets.cmd")
-                .executor(new CommandTicket())
+                .executor(new CommandTicket(this))
                 .child(CommandSpec.builder()
                         .permission("helptickets.cmd.create")
                         .executor(new CommandTicketCreate(this))
@@ -64,6 +72,7 @@ public class HelpTickets {
                 .child(CommandSpec.builder()
                         .permission("helptickets.cmd.list")
                         .executor(new CommandTicketList(this))
+                        .arguments(GenericArguments.optional(GenericArguments.string(Text.of("player"))))
                         .build(), "list")
                 .child(CommandSpec.builder()
                         .permission("helptickets.cmd.tp")
@@ -75,6 +84,16 @@ public class HelpTickets {
                         .executor(new CommandTicketComplete(this))
                         .arguments(GenericArguments.string(Text.of("id")))
                         .build(), "complete", "done")
+                .child(CommandSpec.builder()
+                        .permission("helptickets.cmd.delete")
+                        .executor(new CommandTicketDelete(this))
+                        .arguments(GenericArguments.string(Text.of("id")))
+                        .build(), "delete", "remove")
+                .child(CommandSpec.builder()
+                        .permission("helptickets.cmd.info")
+                        .executor(new CommandTicketInfo(this))
+                        .arguments(GenericArguments.string(Text.of("id")))
+                        .build(), "info", "i")
                 .build(), "ticket", "tickets", "helptickets");
 
         logger.info("Loaded.");

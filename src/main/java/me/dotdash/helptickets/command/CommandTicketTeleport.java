@@ -21,10 +21,10 @@ import java.util.UUID;
 
 public class CommandTicketTeleport implements CommandExecutor {
 
-    private final HelpTickets tickets;
+    private final HelpTickets plugin;
 
-    public CommandTicketTeleport(HelpTickets tickets) {
-        this.tickets = tickets;
+    public CommandTicketTeleport(HelpTickets plugin) {
+        this.plugin = plugin;
     }
 
     @Override
@@ -37,7 +37,7 @@ public class CommandTicketTeleport implements CommandExecutor {
         Player player = (Player) src;
         String id = args.<String>getOne("id").get();
 
-        CommentedConfigurationNode ticket = tickets.getTickets().get(id);
+        CommentedConfigurationNode ticket = plugin.getTickets().get(id);
 
         if (ticket.isVirtual()) {
             src.sendMessage(Text.of(TextColors.RED, "That ticket does not exist!"));
