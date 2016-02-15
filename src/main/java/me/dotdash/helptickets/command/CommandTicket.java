@@ -11,12 +11,13 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.text.format.TextColors;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
 
 public class CommandTicket implements CommandExecutor {
 
-    private static Function<CommandSource, Iterable<Text>> COMMAND_LIST = src -> {
+    private static Function<CommandSource, List<Text>> COMMAND_LIST = src -> {
         List<Text> texts = new ArrayList<>();
         if(src.hasPermission("helptickets.cmd.create")) texts.add(Text.of(TextColors.GREEN, "- /ticket create <message>"));
         if(src.hasPermission("helptickets.cmd.list")) texts.add(Text.of(TextColors.GREEN, "- /ticket list"));
@@ -28,7 +29,8 @@ public class CommandTicket implements CommandExecutor {
     @Override
     public CommandResult execute(CommandSource src, CommandContext args) throws CommandException {
         Sponge.getGame().getServiceManager().provideUnchecked(PaginationService.class).builder()
-                .contents(COMMAND_LIST.apply(src))
+                .contents(!COMMAND_LIST.apply(src).isEmpty() ? COMMAND_LIST.apply(src)
+                        : Arrays.asList(Text.of(TextColors.RED, "You do not have permission to use that command.")))
                 .title(Text.of(TextColors.GRAY, "HelpTickets Commands"))
                 .paddingString("=")
                 .sendTo(src);

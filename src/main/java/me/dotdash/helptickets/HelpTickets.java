@@ -24,7 +24,7 @@ import me.dotdash.helptickets.configuration.HoconConfig;
 
 import java.io.File;
 
-@Plugin(id = "HelpTickets", name = "HelpTickets", version = "1.0.0")
+@Plugin(id = "HelpTickets", name = "HelpTickets", version = "1.1.0")
 public class HelpTickets {
 
     @Inject private Game game;
@@ -54,7 +54,7 @@ public class HelpTickets {
         userStorage = game.getServiceManager().provideUnchecked(UserStorageService.class);
 
         game.getCommandManager().register(this, CommandSpec.builder()
-                .permission("helptickets.cmd")
+                .permission("helptickets.help")
                 .executor(new CommandTicket())
                 .child(CommandSpec.builder()
                         .permission("helptickets.cmd.create")
@@ -71,7 +71,7 @@ public class HelpTickets {
                         .arguments(GenericArguments.string(Text.of("id")))
                         .build(), "teleport", "tp")
                 .child(CommandSpec.builder()
-                        .permission("helptickets.cmd.complete")
+                        .permission("helptickets.cmd.complete.nodelete")
                         .executor(new CommandTicketComplete(this))
                         .arguments(GenericArguments.string(Text.of("id")))
                         .build(), "complete", "done")

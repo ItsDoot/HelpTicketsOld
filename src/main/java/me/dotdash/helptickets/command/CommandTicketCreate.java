@@ -15,13 +15,9 @@ import org.spongepowered.api.world.World;
 
 import me.dotdash.helptickets.HelpTickets;
 
-import java.math.BigInteger;
-import java.security.SecureRandom;
 import java.util.HashMap;
 
 public class CommandTicketCreate implements CommandExecutor {
-
-    private final SecureRandom rand = new SecureRandom();
 
     private final HelpTickets tickets;
 
@@ -38,10 +34,12 @@ public class CommandTicketCreate implements CommandExecutor {
 
         Player player = (Player) src;
         String message = args.<String>getOne("message").get();
+        int counter = 0;
         String randId;
 
         do {
-            randId = new BigInteger(130, rand).toString(32).substring(0, 7);
+            randId = player.getName().substring(0, 3) + counter;
+            counter++;
         } while(!tickets.getTickets().get(randId).isVirtual());
 
         Location<World> loc = player.getLocation();
@@ -53,6 +51,7 @@ public class CommandTicketCreate implements CommandExecutor {
         tickets.getTickets().get(randId, "location").setValue(loc.getExtent().getUniqueId().toString() + ":"
                 + loc.getX() + ":" + loc.getY() + ":" + loc.getZ());
         tickets.getTickets().get(randId, "rotation").setValue(rot.getX() + ":" + rot.getY() + ":" + rot.getZ());
+        tickets.getTickets().get(randId, "completed").setValue(false);
         tickets.getTickets().save();
 
         player.sendMessage(Text.of(TextColors.GREEN, "Ticket created!"));

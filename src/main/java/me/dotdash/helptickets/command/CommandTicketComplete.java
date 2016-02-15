@@ -33,12 +33,28 @@ public class CommandTicketComplete implements CommandExecutor {
             return CommandResult.success();
         }
 
-        Sponge.getServer().getPlayer(UUID.fromString(ticket.getNode("player").getString()))
-                .ifPresent(player -> player.sendMessage(Text.of(TextColors.GREEN, "Your ticket has been completed by ",
-                        TextColors.WHITE, src.getName()))
-                );
-        ticket.setValue(null);
+        if(ticket.getNode("completed").getBoolean() && !src.hasPermission("helptickets.delete")) {
+            src.sendMessage(Text.of(TextColors.RED, "That ticket is already completed."));
+            return CommandResult.success();
+        }
+
+        if(!ticket.getNode("completed").getBoolean()) {
+            Sponge.getServer().getPlayer(UUID.fromString(ticket.getNode("player").getString()))
+                    .ifPresent(player -> player.sendMessage(Text.of(TextColors.GREEN, "Your ticket has been completed by ",
+                            TextColors.WHITE, src.getName()))
+                    );
+        }
+
+        if (!src.hasPermission("helptickets.delete")) {
+            ticket.getNode("completed").setValue(true);
+            src.sendMessage(Text.of(TextColors.GREEN, "Ticket completed."));
+        } else {
+            ticket.setValue(null);
+            src.sendMessage(Text.of(TextColors.GREEN, "Ticket completed & deleted."));
+        }
+
         tickets.getTickets().save();
+
         return CommandResult.success();
     }
 }
